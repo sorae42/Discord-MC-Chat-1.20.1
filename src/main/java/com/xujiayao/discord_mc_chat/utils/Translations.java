@@ -131,11 +131,21 @@ public class Translations {
 
 		String translation1 = translations.get(key);
 		if (translation1 != null) {
-			return String.format(translation1, args);
+			try {
+				return String.format(translation1, args);
+			} catch (Exception e) {
+				LOGGER.error("Error formatting translation for key '{}': {}", key, ExceptionUtils.getStackTrace(e));
+				return translation1 + " " + Arrays.toString(args);
+			}
 		} else {
 			String translation2 = Language.getInstance().getOrDefault(key);
 			if (!translation2.equals(key)) {
-				return String.format(translation2, args);
+				try {
+					return String.format(translation2, args);
+				} catch (Exception e) {
+					LOGGER.error("Error formatting fallback translation for key '{}': {}", key, ExceptionUtils.getStackTrace(e));
+					return translation2 + " " + Arrays.toString(args);
+				}
 			} else {
 				return "TranslateError{\"key\":\"" + key + "\",\"args\":" + Arrays.toString(args) + "}";
 			}
