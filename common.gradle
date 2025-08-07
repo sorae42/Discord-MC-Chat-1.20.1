@@ -2,13 +2,10 @@ import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 
 apply plugin: "fabric-loom"
-apply plugin: "com.replaymod.preprocess"
-
-int mcVersion = project.mcVersion
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 version = mod_version
@@ -18,6 +15,13 @@ base {
     archivesName = "${archives_base_name}-${minecraft_version}"
 }
 
+repositories {
+    maven {
+        name = "IntelliJ Release"
+        url = "https://www.jetbrains.com/intellij-repository/releases"
+    }
+}
+
 dependencies {
     minecraft("com.mojang:minecraft:${minecraft_version}")
     mappings(loom.officialMojangMappings())
@@ -25,23 +29,61 @@ dependencies {
     modImplementation("net.fabricmc:fabric-loader:${loader_version}")
     modApi("net.fabricmc.fabric-api:fabric-api:${fabric_version}")
 
-    modImplementation("net.dv8tion:JDA:5.6.1") {
+    // Bundle all dependencies directly into the mod jar
+    implementation("net.dv8tion:JDA:5.6.1") {
         exclude module: "opus-java"
     }
-    modImplementation("net.sf.trove4j:core:3.1.0")
-    modImplementation("org.apache.commons:commons-collections4:4.4")
-    modImplementation("org.slf4j:slf4j-api:2.0.17")
-    modImplementation("com.neovisionaries:nv-websocket-client:2.14")
-    modImplementation("com.fasterxml.jackson.core:jackson-core:2.18.3")
-    modImplementation("com.fasterxml.jackson.core:jackson-databind:2.18.3")
-    modImplementation("com.fasterxml.jackson.core:jackson-annotations:2.18.3")
-    modImplementation("com.squareup.okhttp3:okhttp:4.12.0")
-    modImplementation("com.squareup.okio:okio-jvm:3.6.0")
-    modImplementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.10")
-
-    modImplementation("net.fellbaum:jemoji:1.7.4")
-
-    modImplementation("com.google.code.gson:gson:2.13.1")
+    include("net.dv8tion:JDA:5.6.1") {
+        exclude module: "opus-java"
+    }
+    
+    implementation("net.sf.trove4j:core:3.1.0")
+    include("net.sf.trove4j:core:3.1.0")
+    
+    implementation("org.apache.commons:commons-collections4:4.4")
+    include("org.apache.commons:commons-collections4:4.4")
+    
+    implementation("org.slf4j:slf4j-api:2.0.17")
+    include("org.slf4j:slf4j-api:2.0.17")
+    
+    implementation("org.apache.logging.log4j:log4j-slf4j2-impl:2.25.0")
+    include("org.apache.logging.log4j:log4j-slf4j2-impl:2.25.0")
+    
+    implementation("com.neovisionaries:nv-websocket-client:2.14")
+    include("com.neovisionaries:nv-websocket-client:2.14")
+    
+    implementation("com.fasterxml.jackson.core:jackson-core:2.18.3")
+    include("com.fasterxml.jackson.core:jackson-core:2.18.3")
+    
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.18.3")
+    include("com.fasterxml.jackson.core:jackson-databind:2.18.3")
+    
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.18.3")
+    include("com.fasterxml.jackson.core:jackson-annotations:2.18.3")
+    
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    include("com.squareup.okhttp3:okhttp:4.12.0")
+    
+    implementation("com.squareup.okio:okio-jvm:3.6.0")
+    include("com.squareup.okio:okio-jvm:3.6.0")
+    
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.10")
+    include("org.jetbrains.kotlin:kotlin-stdlib:1.9.10")
+    
+    implementation("net.fellbaum:jemoji:1.7.4")
+    include("net.fellbaum:jemoji:1.7.4")
+    
+    implementation("com.google.code.gson:gson:2.13.1")
+    include("com.google.code.gson:gson:2.13.1")
+    
+    implementation("com.jetbrains.intellij.java:java-gui-forms-rt:251.27812.49")
+    include("com.jetbrains.intellij.java:java-gui-forms-rt:251.27812.49")
+    
+    implementation("com.formdev:flatlaf:3.6.1")
+    include("com.formdev:flatlaf:3.6.1")
+    
+    implementation("com.formdev:flatlaf-extras:3.6.1")
+    include("com.formdev:flatlaf-extras:3.6.1")
 }
 
 processResources {
@@ -54,12 +96,13 @@ processResources {
     }
 
     doLast {
-        ArrayList<?> minecraft_dependency = minecraft_dependency.split(",")
+        // Set minecraft dependency from gradle.properties
+        def minecraft_deps = minecraft_dependency.split(",")
 
         File file = file("build/resources/main/fabric.mod.json")
         JsonSlurper slurper = new JsonSlurper()
         JsonBuilder builder = new JsonBuilder(slurper.parse(file))
-        builder.content.depends.minecraft = minecraft_dependency
+        builder.content.depends.minecraft = minecraft_deps
         BufferedWriter writer = file.newWriter()
         writer.append(builder.toPrettyString())
         writer.flush()
@@ -69,5 +112,5 @@ processResources {
 
 tasks.withType(JavaCompile).configureEach {
     it.options.encoding = "UTF-8"
-    it.options.release = 17
+    it.options.release = 21
 }

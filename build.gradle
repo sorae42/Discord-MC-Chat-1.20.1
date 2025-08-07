@@ -1,14 +1,74 @@
 plugins {
-    id "fabric-loom" version "1.11-SNAPSHOT" apply false
-    id "com.replaymod.preprocess" version "d452ef7612"
-    id "com.gradleup.shadow" version "8.3.8" apply false
+    id 'fabric-loom' version '1.11-SNAPSHOT'
+    id 'com.gradleup.shadow' version '9.0.0-beta2'
 }
 
-preprocess {
-    preprocess.strictExtraMappings.set(false)
-    def mc1201 = createNode("1.20.1", 1_20_01, "mojang")
+apply from: "common.gradle"
+
+// Add shadow configuration for bundling dependencies
+configurations {
+    shadow
 }
 
-project.afterEvaluate {
-    delete file("build")
+dependencies {
+    // Add dependencies as implementation first (for compilation), then include (for bundling)
+    implementation("net.dv8tion:JDA:5.6.1") {
+        exclude module: "opus-java"
+    }
+    include("net.dv8tion:JDA:5.6.1") {
+        exclude module: "opus-java"
+    }
+    
+    implementation("net.sf.trove4j:core:3.1.0")
+    include("net.sf.trove4j:core:3.1.0")
+    
+    implementation("org.apache.commons:commons-collections4:4.4")
+    include("org.apache.commons:commons-collections4:4.4")
+    
+    shadow(implementation("org.slf4j:slf4j-api:2.0.17"))
+    shadow(implementation("org.apache.logging.log4j:log4j-slf4j2-impl:2.25.0"))
+    
+    implementation("com.neovisionaries:nv-websocket-client:2.14")
+    include("com.neovisionaries:nv-websocket-client:2.14")
+    
+    implementation("com.fasterxml.jackson.core:jackson-core:2.18.3")
+    include("com.fasterxml.jackson.core:jackson-core:2.18.3")
+    
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.18.3")
+    include("com.fasterxml.jackson.core:jackson-databind:2.18.3")
+    
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.18.3")
+    include("com.fasterxml.jackson.core:jackson-annotations:2.18.3")
+    
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    include("com.squareup.okhttp3:okhttp:4.12.0")
+    
+    implementation("com.squareup.okio:okio-jvm:3.6.0")
+    include("com.squareup.okio:okio-jvm:3.6.0")
+    
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.10")
+    include("org.jetbrains.kotlin:kotlin-stdlib:1.9.10")
+    
+    implementation("net.fellbaum:jemoji:1.7.4")
+    include("net.fellbaum:jemoji:1.7.4")
+    
+    shadow(implementation("com.google.code.gson:gson:2.13.1"))
+}
+
+shadowJar {
+    configurations = [project.configurations.shadow]
+    archiveClassifier = ""
+}
+
+jar {
+    dependsOn shadowJar
+    
+    from("LICENSE") {
+        rename { "${it}_${archives_base_name}" }
+    }
+    
+    // Include shadow jar contents
+    from(zipTree(shadowJar.archiveFile)) {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
 }

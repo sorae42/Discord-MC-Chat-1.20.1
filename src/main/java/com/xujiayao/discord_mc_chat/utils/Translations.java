@@ -68,11 +68,11 @@ public class Translations {
 					return;
 				}
 
-				File minecraftLangFile = new File(FabricLoader.getInstance().getConfigDir().toFile(), "/discord-mc-chat/" + DetectedVersion.tryDetectVersion().name() + "-" + CONFIG.generic.language + ".json");
+				File minecraftLangFile = new File(FabricLoader.getInstance().getConfigDir().toFile(), "/discord-mc-chat/" + DetectedVersion.tryDetectVersion().getName() + "-" + CONFIG.generic.language + ".json");
 
 				if (minecraftLangFile.length() == 0) {
 					Request request1 = new Request.Builder()
-							.url("https://cdn.jsdelivr.net/gh/InventivetalentDev/minecraft-assets@" + DetectedVersion.tryDetectVersion().name() + "/assets/minecraft/lang/" + CONFIG.generic.language + ".json")
+							.url("https://cdn.jsdelivr.net/gh/InventivetalentDev/minecraft-assets@" + DetectedVersion.tryDetectVersion().getName() + "/assets/minecraft/lang/" + CONFIG.generic.language + ".json")
 							.cacheControl(CacheControl.FORCE_NETWORK)
 							.build();
 
@@ -157,10 +157,12 @@ public class Translations {
 			Field field = CONFIG.customMessage.getClass().getField(key.substring(8));
 			String configValue = (String) field.get(CONFIG.customMessage);
 
-			return configValue.isBlank() ? translations.get(key) : configValue;
+			String result = configValue.isBlank() ? translations.get(key) : configValue;
+			return result != null ? result : "Translation not found: " + key;
 		} catch (Exception e) {
 			LOGGER.error(ExceptionUtils.getStackTrace(e));
-			return translations.get(key);
+			String fallback = translations.get(key);
+			return fallback != null ? fallback : "Translation not found: " + key;
 		}
 	}
 }

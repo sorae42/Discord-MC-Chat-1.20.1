@@ -84,14 +84,18 @@ public class MinecraftEventListener {
 
 			if (StringUtils.countMatches(contentToDiscord, ":") >= 2) {
 				String[] emojiNames = StringUtils.substringsBetween(contentToDiscord, ":", ":");
-				for (String emojiName : emojiNames) {
-					List<RichCustomEmoji> emojis = JDA.getEmojisByName(emojiName, true);
-					if (!emojis.isEmpty()) {
-						contentToDiscord = StringUtils.replaceIgnoreCase(contentToDiscord, (":" + emojiName + ":"), emojis.getFirst().getAsMention());
-						contentToMinecraft = StringUtils.replaceIgnoreCase(contentToMinecraft, (":" + emojiName + ":"), (ChatFormatting.YELLOW + ":" + MarkdownSanitizer.escape(emojiName) + ":" + ChatFormatting.RESET));
-					} else if (EmojiManager.getByAlias(emojiName).isPresent()) {
-						contentToMinecraft = StringUtils.replaceIgnoreCase(contentToMinecraft, (":" + emojiName + ":"), (ChatFormatting.YELLOW + ":" + MarkdownSanitizer.escape(emojiName) + ":" + ChatFormatting.RESET));
+				if (emojiNames != null) {
+					for (String emojiName : emojiNames) {
+						List<RichCustomEmoji> emojis = JDA.getEmojisByName(emojiName, true);
+						if (!emojis.isEmpty()) {
+							contentToDiscord = StringUtils.replaceIgnoreCase(contentToDiscord, (":" + emojiName + ":"), emojis.getFirst().getAsMention());
+							contentToMinecraft = StringUtils.replaceIgnoreCase(contentToMinecraft, (":" + emojiName + ":"), (ChatFormatting.YELLOW + ":" + MarkdownSanitizer.escape(emojiName) + ":" + ChatFormatting.RESET));
+						} else if (EmojiManager.getByAlias(emojiName).isPresent()) {
+							contentToMinecraft = StringUtils.replaceIgnoreCase(contentToMinecraft, (":" + emojiName + ":"), (ChatFormatting.YELLOW + ":" + MarkdownSanitizer.escape(emojiName) + ":" + ChatFormatting.RESET));
+						}
 					}
+				} else {
+					LOGGER.warn("Failed to parse emoji names from player message - skipping emoji processing");
 				}
 			}
 
@@ -137,12 +141,16 @@ public class MinecraftEventListener {
 					if (!StringUtils.substringAfterLast(contentToMinecraft, protocol).contains(" ")) {
 						links = ArrayUtils.add(links, StringUtils.substringAfterLast(contentToMinecraft, protocol));
 					}
-					for (String link : links) {
-						if (link.contains("\n")) {
-							link = StringUtils.substringBefore(link, "\n");
-						}
+					if (links != null) {
+						for (String link : links) {
+							if (link.contains("\n")) {
+								link = StringUtils.substringBefore(link, "\n");
+							}
 
-						contentToMinecraft = contentToMinecraft.replace(link, MarkdownSanitizer.escape(link));
+							contentToMinecraft = contentToMinecraft.replace(link, MarkdownSanitizer.escape(link));
+						}
+					} else {
+						LOGGER.warn("Failed to parse links from player message with protocol: " + protocol + " - skipping link processing");
 					}
 				}
 			}
@@ -226,17 +234,11 @@ public class MinecraftEventListener {
 		});
 
 		MinecraftEvents.PLAYER_ADVANCEMENT.register((player, advancementHolder, isDone) -> {
-			//#if MC >= 12002
-			if (advancementHolder.value().display().isEmpty()) {
+			// MC 1.20.1 API - direct access to display info
+			if (advancementHolder.getDisplay() == null) {
 				return;
 			}
-			DisplayInfo display = advancementHolder.value().display().get();
-			//#else
-			//$$ if (advancementHolder.getDisplay() == null) {
-			//$$ 	return;
-			//$$ }
-			//$$ DisplayInfo display = advancementHolder.getDisplay();
-			//#endif
+			DisplayInfo display = advancementHolder.getDisplay();
 
 			if (CONFIG.generic.announceAdvancements
 					&& isDone
@@ -244,14 +246,14 @@ public class MinecraftEventListener {
 					&& player.level().getGameRules().getBoolean(GameRules.RULE_ANNOUNCE_ADVANCEMENTS)) {
 				String message = "null";
 
-				switch (display.getType()) {
+				switch (display.getFrame()) {
 					case GOAL -> message = Translations.translateMessage("message.advancementGoal");
 					case TASK -> message = Translations.translateMessage("message.advancementTask");
 					case CHALLENGE -> message = Translations.translateMessage("message.advancementChallenge");
 				}
 
-				String title = Translations.translate("advancements." + advancementHolder.id().getPath().replace("/", ".") + ".title");
-				String description = Translations.translate("advancements." + advancementHolder.id().getPath().replace("/", ".") + ".description");
+				String title = Translations.translate("advancements." + advancementHolder.getId().getPath().replace("/", ".") + ".title");
+				String description = Translations.translate("advancements." + advancementHolder.getId().getPath().replace("/", ".") + ".description");
 
 				message = message
 						.replace("%playerName%", MarkdownSanitizer.escape(Objects.requireNonNull(player.getDisplayName()).getString()))
@@ -363,11 +365,8 @@ public class MinecraftEventListener {
 		String hash = "null";
 		if (CONFIG.generic.avatarApi.contains("{player_textures}")) {
 			try {
-				//#if MC > 12001
-				String textures = player.getGameProfile().getProperties().get("textures").iterator().next().value();
-				//#else
-				//$$ String textures = player.getGameProfile().getProperties().get("textures").iterator().next().getValue();
-				//#endif
+				// MC 1.20.1 uses getValue() instead of value()
+				String textures = player.getGameProfile().getProperties().get("textures").iterator().next().getValue();
 
 				JsonObject json = new Gson().fromJson(new String(Base64.getDecoder().decode(textures), StandardCharsets.UTF_8), JsonObject.class);
 				String url = json.getAsJsonObject("textures").getAsJsonObject("SKIN").get("url").getAsString();

@@ -21,11 +21,8 @@ public class MixinTellRawCommand {
 		String input = context.getInput();
 
 		if (input.startsWith("/tellraw @a ") || input.startsWith("tellraw @a ")) {
-			//#if MC >= 12105
-			MinecraftEvents.COMMAND_MESSAGE.invoker().message(ComponentArgument.getRawComponent(context, "message").getString(), context.getSource());
-			//#else
-			//$$ MinecraftEvents.COMMAND_MESSAGE.invoker().message(ComponentArgument.getComponent(context, "message").getString(), context.getSource());
-			//#endif
+			// MC 1.20.1 uses getComponent instead of getRawComponent
+			MinecraftEvents.COMMAND_MESSAGE.invoker().message(ComponentArgument.getComponent(context, "message").getString(), context.getSource());
 		}
 	}
 }

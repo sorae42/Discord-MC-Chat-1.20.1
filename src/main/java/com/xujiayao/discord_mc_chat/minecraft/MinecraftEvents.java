@@ -2,7 +2,7 @@ package com.xujiayao.discord_mc_chat.minecraft;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.advancements.Advancement;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -72,7 +72,7 @@ public interface MinecraftEvents {
 
 
 	interface PlayerAdvancement {
-		void advancement(ServerPlayer player, AdvancementHolder advancementHolder, boolean isDone);
+		void advancement(ServerPlayer player, Advancement advancement, boolean isDone);
 	}
 
 	interface PlayerDie {

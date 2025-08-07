@@ -1,7 +1,7 @@
 package com.xujiayao.discord_mc_chat.minecraft.mixins;
 
 import com.xujiayao.discord_mc_chat.minecraft.MinecraftEvents;
-import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.level.ServerPlayer;
@@ -21,10 +21,10 @@ public abstract class MixinPlayerAdvancements {
 	private ServerPlayer player;
 
 	@Shadow
-	public abstract AdvancementProgress getOrStartProgress(AdvancementHolder advancementHolder);
+	public abstract AdvancementProgress getOrStartProgress(Advancement advancement);
 
-	@Inject(method = "award(Lnet/minecraft/advancements/AdvancementHolder;Ljava/lang/String;)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancements/AdvancementRewards;grant(Lnet/minecraft/server/level/ServerPlayer;)V", shift = At.Shift.AFTER))
-	private void award(AdvancementHolder advancementHolder, String string, CallbackInfoReturnable<Boolean> cir) {
-		MinecraftEvents.PLAYER_ADVANCEMENT.invoker().advancement(player, advancementHolder, getOrStartProgress(advancementHolder).isDone());
+	@Inject(method = "award(Lnet/minecraft/advancements/Advancement;Ljava/lang/String;)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancements/AdvancementRewards;grant(Lnet/minecraft/server/level/ServerPlayer;)V", shift = At.Shift.AFTER))
+	private void award(Advancement advancement, String string, CallbackInfoReturnable<Boolean> cir) {
+		MinecraftEvents.PLAYER_ADVANCEMENT.invoker().advancement(player, advancement, getOrStartProgress(advancement).isDone());
 	}
 }

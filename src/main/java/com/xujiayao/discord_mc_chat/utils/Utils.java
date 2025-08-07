@@ -23,23 +23,12 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.DetectedVersion;
-//#if MC >= 12005
-import net.minecraft.core.RegistryAccess;
-//#endif
 import net.minecraft.network.chat.Component;
-//#if MC >= 12005
-import net.minecraft.network.chat.ComponentSerialization;
-//#endif
 import net.minecraft.network.chat.MutableComponent;
-//#if MC > 12002
-import net.minecraft.server.ServerTickRateManager;
-//#endif
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.UserWhiteList;
 import net.minecraft.server.players.UserWhiteListEntry;
-//#if MC > 11502
 import net.minecraft.util.TimeUtil;
-//#endif
 import net.minecraft.util.Tuple;
 import okhttp3.CacheControl;
 import okhttp3.Request;
@@ -128,7 +117,7 @@ public class Utils {
 			try (Response response = HTTP_CLIENT.newCall(request).execute()) {
 				String result = Objects.requireNonNull(response.body()).string();
 
-				String minecraftVersion = DetectedVersion.tryDetectVersion().name();
+				String minecraftVersion = DetectedVersion.tryDetectVersion().getName();
 
 				String latestVersion = "";
 				String latestChangelog = "";
@@ -456,11 +445,7 @@ public class Utils {
 			message.append(Translations.translate("utils.utils.gicMessage.noPlayersOnline"));
 		} else {
 			for (ServerPlayer player : onlinePlayers) {
-				//#if MC >= 12002
-				message.append("[").append(player.connection.latency()).append("ms] ").append(Objects.requireNonNull(player.getDisplayName()).getString()).append("\n");
-				//#else
-				//$$ message.append("[").append(player.latency).append("ms] ").append(Objects.requireNonNull(player.getDisplayName()).getString()).append("\n");
-				//#endif
+				message.append("[").append(player.latency).append("ms] ").append(Objects.requireNonNull(player.getDisplayName()).getString()).append("\n");
 			}
 		}
 
@@ -653,39 +638,19 @@ public class Utils {
 	}
 
 	private static Tuple<Double, Double> getTickInfo() {
-		//#if MC > 12002
-		ServerTickRateManager manager = SERVER.tickRateManager();
-
-		double mspt = ((double) SERVER.getAverageTickTimeNanos()) / TimeUtil.NANOSECONDS_PER_MILLISECOND;
-
-		double tps = 1000.0D / Math.max(manager.isSprinting() ? 0.0 : manager.millisecondsPerTick(), mspt);
-		if (manager.isFrozen()) {
-			tps = 0;
-		}
-		//#else
-		//$$ // TODO Compat TPS & MSPT (Issue #217)
-		//$$ double mspt = SERVER.getAverageTickTime();
-		//$$ double tps = Math.min(1000.0 / mspt, 20);
-		//#endif
+		// TODO Compat TPS & MSPT (Issue #217)
+		double mspt = SERVER.getAverageTickTime();
+		double tps = Math.min(1000.0 / mspt, 20);
 
 		return new Tuple<>(tps, mspt);
 	}
 
 	public static MutableComponent fromJson(String json) {
-		JsonElement jsonElement = JsonParser.parseString(json);
-		//#if MC >= 12005
-		return jsonElement == null ? null : (MutableComponent) ComponentSerialization.CODEC.parse(RegistryAccess.EMPTY.createSerializationContext(JsonOps.INSTANCE), jsonElement).getOrThrow();
-		//#else
-		//$$ return Component.Serializer.fromJson(json);
-		//#endif
+		return Component.Serializer.fromJson(json);
 	}
 
 	public static String toJson(Component component) {
-		//#if MC >= 12005
-		return new Gson().toJson(ComponentSerialization.CODEC.encodeStart(RegistryAccess.EMPTY.createSerializationContext(JsonOps.INSTANCE), component).getOrThrow());
-		//#else
-		//$$ return Component.Serializer.toJson(component);
-		//#endif
+		return Component.Serializer.toJson(component);
 	}
 
 	public static String sanitize(String in) {

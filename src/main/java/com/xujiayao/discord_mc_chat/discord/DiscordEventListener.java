@@ -340,17 +340,31 @@ public class DiscordEventListener extends ListenerAdapter {
 
 		String[] textBeforePlaceholder = new String[2];
 		String[] textAfterPlaceholder = new String[2];
-		for (String part : StringUtils.substringsBetween(Translations.translateMessage("message.formattedResponseMessage"), "{", "}")) {
-			if (part.contains("%message%")) {
-				textBeforePlaceholder[0] = StringUtils.substringBefore(part, "%message%");
-				textAfterPlaceholder[0] = StringUtils.substringAfter(part, "%message%");
+		String[] responseParts = StringUtils.substringsBetween(Translations.translateMessage("message.formattedResponseMessage"), "{", "}");
+		if (responseParts != null) {
+			for (String part : responseParts) {
+				if (part.contains("%message%")) {
+					textBeforePlaceholder[0] = StringUtils.substringBefore(part, "%message%");
+					textAfterPlaceholder[0] = StringUtils.substringAfter(part, "%message%");
+				}
 			}
+		} else {
+			LOGGER.warn("Failed to parse formattedResponseMessage template - using fallback values");
+			textBeforePlaceholder[0] = "";
+			textAfterPlaceholder[0] = "";
 		}
-		for (String part : StringUtils.substringsBetween(Translations.translateMessage("message.formattedChatMessage"), "{", "}")) {
-			if (part.contains("%message%")) {
-				textBeforePlaceholder[1] = StringUtils.substringBefore(part, "%message%");
-				textAfterPlaceholder[1] = StringUtils.substringAfter(part, "%message%");
+		String[] chatParts = StringUtils.substringsBetween(Translations.translateMessage("message.formattedChatMessage"), "{", "}");
+		if (chatParts != null) {
+			for (String part : chatParts) {
+				if (part.contains("%message%")) {
+					textBeforePlaceholder[1] = StringUtils.substringBefore(part, "%message%");
+					textAfterPlaceholder[1] = StringUtils.substringAfter(part, "%message%");
+				}
 			}
+		} else {
+			LOGGER.warn("Failed to parse formattedChatMessage template - using fallback values");
+			textBeforePlaceholder[1] = "";
+			textAfterPlaceholder[1] = "";
 		}
 
 		String finalReferencedMessage = "";
@@ -389,11 +403,15 @@ public class DiscordEventListener extends ListenerAdapter {
 
 				if (StringUtils.countMatches(referencedMessage, ":") >= 2) {
 					String[] emojiNames = StringUtils.substringsBetween(referencedMessage.toString(), ":", ":");
-					for (String emojiName : emojiNames) {
-						List<RichCustomEmoji> emojis = JDA.getEmojisByName(emojiName, true);
-						if (!emojis.isEmpty() || EmojiManager.getByAlias(emojiName).isPresent()) {
-							referencedMessage = new StringBuilder(StringUtils.replaceIgnoreCase(referencedMessage.toString(), (":" + emojiName + ":"), (ChatFormatting.YELLOW + ":" + emojiName + ":" + ChatFormatting.RESET)));
+					if (emojiNames != null) {
+						for (String emojiName : emojiNames) {
+							List<RichCustomEmoji> emojis = JDA.getEmojisByName(emojiName, true);
+							if (!emojis.isEmpty() || EmojiManager.getByAlias(emojiName).isPresent()) {
+								referencedMessage = new StringBuilder(StringUtils.replaceIgnoreCase(referencedMessage.toString(), (":" + emojiName + ":"), (ChatFormatting.YELLOW + ":" + emojiName + ":" + ChatFormatting.RESET)));
+							}
 						}
+					} else {
+						LOGGER.warn("Failed to parse emoji names from referenced message - skipping emoji processing");
 					}
 				}
 
@@ -431,19 +449,23 @@ public class DiscordEventListener extends ListenerAdapter {
 						if (!StringUtils.substringAfterLast(finalReferencedMessage, protocol).contains(" ")) {
 							links = ArrayUtils.add(links, StringUtils.substringAfterLast(finalReferencedMessage, protocol));
 						}
-						for (String link : links) {
-							if (link.contains("\n")) {
-								link = StringUtils.substringBefore(link, "\n");
-							}
+						if (links != null) {
+							for (String link : links) {
+								if (link.contains("\n")) {
+									link = StringUtils.substringBefore(link, "\n");
+								}
 
-							String hyperlinkInsert;
-							if (StringUtils.containsIgnoreCase(link, "gif")
-									&& StringUtils.containsIgnoreCase(link, "tenor.com")) {
-								hyperlinkInsert = textAfterPlaceholder[0] + "},{\"text\":\"<gif>\",\"bold\":false,\"underlined\":true,\"color\":\"yellow\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" + protocol + link + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[{\"text\":\"Open URL\"}]}},{" + textBeforePlaceholder[0];
-							} else {
-								hyperlinkInsert = textAfterPlaceholder[0] + "},{\"text\":\"" + protocol + link + "\",\"bold\":false,\"underlined\":true,\"color\":\"yellow\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" + protocol + link + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[{\"text\":\"Open URL\"}]}},{" + textBeforePlaceholder[0];
+								String hyperlinkInsert;
+								if (StringUtils.containsIgnoreCase(link, "gif")
+										&& StringUtils.containsIgnoreCase(link, "tenor.com")) {
+									hyperlinkInsert = textAfterPlaceholder[0] + "},{\"text\":\"<gif>\",\"bold\":false,\"underlined\":true,\"color\":\"yellow\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" + protocol + link + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[{\"text\":\"Open URL\"}]}},{" + textBeforePlaceholder[0];
+								} else {
+									hyperlinkInsert = textAfterPlaceholder[0] + "},{\"text\":\"" + protocol + link + "\",\"bold\":false,\"underlined\":true,\"color\":\"yellow\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" + protocol + link + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[{\"text\":\"Open URL\"}]}},{" + textBeforePlaceholder[0];
+								}
+								finalReferencedMessage = StringUtils.replaceIgnoreCase(finalReferencedMessage, (protocol + link), hyperlinkInsert);
 							}
-							finalReferencedMessage = StringUtils.replaceIgnoreCase(finalReferencedMessage, (protocol + link), hyperlinkInsert);
+						} else {
+							LOGGER.warn("Failed to parse links from referenced message with protocol: " + protocol + " - skipping link processing");
 						}
 					}
 				}
@@ -478,11 +500,15 @@ public class DiscordEventListener extends ListenerAdapter {
 
 			if (StringUtils.countMatches(message, ":") >= 2) {
 				String[] emojiNames = StringUtils.substringsBetween(message.toString(), ":", ":");
-				for (String emojiName : emojiNames) {
-					List<RichCustomEmoji> emojis = JDA.getEmojisByName(emojiName, true);
-					if (!emojis.isEmpty() || EmojiManager.getByAlias(emojiName).isPresent()) {
-						message = new StringBuilder(StringUtils.replaceIgnoreCase(message.toString(), (":" + emojiName + ":"), (ChatFormatting.YELLOW + ":" + MarkdownSanitizer.escape(emojiName) + ":" + ChatFormatting.RESET)));
+				if (emojiNames != null) {
+					for (String emojiName : emojiNames) {
+						List<RichCustomEmoji> emojis = JDA.getEmojisByName(emojiName, true);
+						if (!emojis.isEmpty() || EmojiManager.getByAlias(emojiName).isPresent()) {
+							message = new StringBuilder(StringUtils.replaceIgnoreCase(message.toString(), (":" + emojiName + ":"), (ChatFormatting.YELLOW + ":" + MarkdownSanitizer.escape(emojiName) + ":" + ChatFormatting.RESET)));
+						}
 					}
+				} else {
+					LOGGER.warn("Failed to parse emoji names from chat message - skipping emoji processing");
 				}
 			}
 
@@ -520,19 +546,23 @@ public class DiscordEventListener extends ListenerAdapter {
 					if (!StringUtils.substringAfterLast(finalMessage, protocol).contains(" ")) {
 						links = ArrayUtils.add(links, StringUtils.substringAfterLast(finalMessage, protocol));
 					}
-					for (String link : links) {
-						if (link.contains("\n")) {
-							link = StringUtils.substringBefore(link, "\n");
-						}
+					if (links != null) {
+						for (String link : links) {
+							if (link.contains("\n")) {
+								link = StringUtils.substringBefore(link, "\n");
+							}
 
-						String hyperlinkInsert;
-						if (StringUtils.containsIgnoreCase(link, "gif")
-								&& StringUtils.containsIgnoreCase(link, "tenor.com")) {
-							hyperlinkInsert = textAfterPlaceholder[1] + "},{\"text\":\"<gif>\",\"bold\":false,\"underlined\":true,\"color\":\"yellow\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" + protocol + link + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[{\"text\":\"Open URL\"}]}},{" + textBeforePlaceholder[1];
-						} else {
-							hyperlinkInsert = textAfterPlaceholder[1] + "},{\"text\":\"" + protocol + link + "\",\"bold\":false,\"underlined\":true,\"color\":\"yellow\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" + protocol + link + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[{\"text\":\"Open URL\"}]}},{" + textBeforePlaceholder[1];
+							String hyperlinkInsert;
+							if (StringUtils.containsIgnoreCase(link, "gif")
+									&& StringUtils.containsIgnoreCase(link, "tenor.com")) {
+								hyperlinkInsert = textAfterPlaceholder[1] + "},{\"text\":\"<gif>\",\"bold\":false,\"underlined\":true,\"color\":\"yellow\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" + protocol + link + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[{\"text\":\"Open URL\"}]}},{" + textBeforePlaceholder[1];
+							} else {
+								hyperlinkInsert = textAfterPlaceholder[1] + "},{\"text\":\"" + protocol + link + "\",\"bold\":false,\"underlined\":true,\"color\":\"yellow\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\"" + protocol + link + "\"},\"hoverEvent\":{\"action\":\"show_text\",\"contents\":[{\"text\":\"Open URL\"}]}},{" + textBeforePlaceholder[1];
+							}
+							finalMessage = StringUtils.replaceIgnoreCase(finalMessage, (protocol + link), hyperlinkInsert);
 						}
-						finalMessage = StringUtils.replaceIgnoreCase(finalMessage, (protocol + link), hyperlinkInsert);
+					} else {
+						LOGGER.warn("Failed to parse links from chat message with protocol: " + protocol + " - skipping link processing");
 					}
 				}
 			}
