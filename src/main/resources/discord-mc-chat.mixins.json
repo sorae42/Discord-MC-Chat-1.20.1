@@ -8,8 +8,7 @@
     "MixinPlayerList",
     "MixinSayCommand",
     "MixinServerGamePacketListenerImpl",
-    "MixinServerPlayer",
-    "MixinTellRawCommand"
+    "MixinServerPlayer"
   ],
   "injectors": {
     "defaultRequire": 1

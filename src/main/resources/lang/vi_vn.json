@@ -1,0 +1,85 @@
+{
+  "discord.deListener.oscInteraction.serverNotStarted": "**Bạn cần chờ máy chủ khởi động hoàn toàn!**",
+  "discord.deListener.oscInteraction.notFromGuild": "**Bạn không thể sử dụng lệnh này qua tin nhắn trực tiếp!**",
+  "discord.deListener.oscInteraction.stoppingServer": "**Đang dừng máy chủ!**",
+  "discord.deListener.oscInteraction.executingCommand": "**Đang thực hiện lệnh!**",
+  "discord.deListener.oscInteraction.noPermission": "**Bạn không có quyền sử dụng lệnh này!**",
+  "discord.deListener.oscInteraction.fileNotFound": "**Không tìm thấy tệp đã chỉ định!**",
+
+  "minecraft.mcCommands.register.helpMessageExplanation": "\n\n*Các lệnh bị gạch ngang chưa được triển khai vì dư thừa hoặc không thể thực hiện trong trò chơi.*\n\n*Lệnh chỉ dành cho quản trị viên yêu cầu quyền OP cấp 4 hoặc bảng điều khiển máy chủ.*",
+
+  "utils.clListener.startListening": "**Bắt đầu nghe nhật ký bảng điều khiển!**",
+  "utils.clListener.stopListening": "**Dừng nghe nhật ký bảng điều khiển!**",
+
+  "utils.utils.cUpdate.newVersionAvailable": "**Có phiên bản mới!**",
+  "utils.utils.cUpdate.downloadLink": "Tải về tại: <https://github.com/Xujiayao/Discord-MC-Chat/blob/master/README.md#Download>",
+  "utils.utils.cUpdate.changelog": "Các thay đổi: ",
+  "utils.utils.cUpdate.upToDate": "**Discord-MC-Chat đã được cập nhật!**",
+
+  "utils.utils.whitelist.whitelistFailed": "**Người chơi đã có trong danh sách trắng!**",
+  "utils.utils.whitelist.whitelistSuccess": "**Đã thêm %s vào danh sách trắng!**",
+  "utils.utils.whitelist.playerNotExist": "**Người chơi đó không tồn tại!**",
+
+  "utils.utils.reload.success": "**Tải lại tệp cấu hình thành công!**",
+  "utils.utils.reload.fail": "**Tải lại tệp cấu hình thất bại!**",
+
+  "utils.utils.ghcMessage.help": "Trợ giúp",
+  "utils.utils.ghcMessage.adminOnly": " (chỉ quản trị viên)",
+
+  "utils.utils.gicMessage.serverStatus": "Trạng thái máy chủ",
+  "utils.utils.gicMessage.onlinePlayers": "Người chơi trực tuyến (%s/%s):\n",
+  "utils.utils.gicMessage.noPlayersOnline": "Không có người chơi nào trực tuyến!\n",
+  "utils.utils.gicMessage.serverTps": "\nTPS máy chủ:\n%s",
+  "utils.utils.gicMessage.serverMspt": "\n\nMSPT máy chủ:\n%s",
+  "utils.utils.gicMessage.serverUsedMemory": "\n\nBộ nhớ đã sử dụng của máy chủ:\n%s MB / %s MB",
+
+  "utils.utils.gscMessage.scoreboard": "Bảng điểm",
+  "utils.utils.gscMessage.noResult": "\nKhông có kết quả",
+  "utils.utils.gscMessage.truncated": "Vì tin nhắn gửi qua Discord không được vượt quá 2000 ký tự, bảng điểm đã bị cắt bớt. Bạn có thể thực hiện lệnh [/dmcc stats] trong trò chơi để xem bảng điểm đầy đủ.",
+
+  "utils.utils.ubCommands.help": "Nhận danh sách các lệnh có sẵn",
+  "utils.utils.ubCommands.info": "Truy vấn trạng thái máy chủ",
+  "utils.utils.ubCommands.stats": "Truy vấn bảng điểm cho một thống kê",
+  "utils.utils.ubCommands.stats.type": "Loại thống kê",
+  "utils.utils.ubCommands.stats.name": "Tên thống kê",
+  "utils.utils.ubCommands.update": "Kiểm tra cập nhật",
+  "utils.utils.ubCommands.whitelist": "Thêm người chơi vào danh sách trắng máy chủ",
+  "utils.utils.ubCommands.whitelist.player": "Tên người chơi",
+  "utils.utils.ubCommands.console": "Thực hiện lệnh trong bảng điều khiển máy chủ",
+  "utils.utils.ubCommands.console.command": "Lệnh thực hiện",
+  "utils.utils.ubCommands.log": "Nhận nhật ký máy chủ đã chỉ định",
+  "utils.utils.ubCommands.log.file": "Tên tệp",
+  "utils.utils.ubCommands.reload": "Tải lại tệp cấu hình Discord-MC-Chat",
+  "utils.utils.ubCommands.stop": "Dừng máy chủ",
+
+  "message.unformattedResponseMessage": "    ┌──── <%name%> %message%",
+  "message.unformattedChatMessage": "[%server%] <%name%> %message%",
+  "message.unformattedOtherMessage": "[%server%] %message%",
+  "message.unformattedCommandNotice": "%name% đã thực hiện lệnh %command%!",
+
+  "message.formattedResponseMessage": "[{\"text\":\"    ┌──── \",\"bold\":true,\"color\":\"dark_gray\"},{\"text\":\"<%name%> \",\"bold\":false,\"color\":\"%roleColor%\"},{\"text\":\"%message%\",\"bold\":false,\"color\":\"dark_gray\"}]",
+  "message.formattedChatMessage": "[{\"text\":\"[%server%] \",\"bold\":true,\"color\":\"blue\"},{\"text\":\"<%name%> \",\"bold\":false,\"color\":\"%roleColor%\"},{\"text\":\"%message%\",\"bold\":false,\"color\":\"gray\"}]",
+  "message.formattedOtherMessage": "[{\"text\":\"[%server%] \",\"bold\":true,\"color\":\"blue\"},{\"text\":\"%message%\",\"bold\":false,\"color\":\"gray\"}]",
+  "message.formattedCommandNotice": "[{\"text\":\"%name% \",\"bold\":false,\"color\":\"%roleColor%\"},{\"text\":\"đã thực hiện lệnh %command%!\",\"bold\":false,\"color\":\"gray\"}]",
+
+  "message.messageWithoutWebhook": "<%name%> %message%",
+  "message.messageWithoutWebhookForMultiServer": "[%server%] <%name%> %message%",
+
+  "message.serverStarted": "**Máy chủ đã khởi động!**",
+  "message.serverStopped": "**Máy chủ đã dừng!**",
+
+  "message.joinServer": "**%playerName% đã tham gia!**",
+  "message.leftServer": "**%playerName% đã rời khỏi!**",
+
+  "message.deathMessage": "**%deathMessage%**",
+
+  "message.advancementTask": "**%playerName% đã đạt được thành tựu [%advancement%]**\n*%description%*",
+  "message.advancementChallenge": "**%playerName% đã hoàn thành thử thách [%advancement%]**\n*%description%*",
+  "message.advancementGoal": "**%playerName% đã đạt mục tiêu [%advancement%]**\n*%description%*",
+
+  "message.highMspt": "**MSPT máy chủ (%mspt%) vượt quá %msptLimit%!**",
+
+  "message.offlineChannelTopic": ":x: Máy chủ ngoại tuyến | Cập nhật lần cuối: <t:%lastUpdateTime%:f>",
+  "message.onlineChannelTopic": ":white_check_mark: %onlinePlayerCount%/%maxPlayerCount% người chơi trực tuyến | %uniquePlayerCount% người chơi duy nhất từng tham gia | Máy chủ khởi động <t:%serverStartedTime%:R> | Cập nhật lần cuối: <t:%lastUpdateTime%:f>",
+  "message.onlineChannelTopicForMultiServer": ":white_check_mark: %onlinePlayerCount%/%maxPlayerCount% người chơi trực tuyến | %uniquePlayerCount% người chơi duy nhất từng tham gia | %onlineServerCount% máy chủ trực tuyến [%onlineServerList%] | Máy chủ khởi động <t:%serverStartedTime%:R> | Cập nhật lần cuối: <t:%lastUpdateTime%:f>"
+}
